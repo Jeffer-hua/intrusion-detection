@@ -18,7 +18,14 @@ class DiffFrame(object):
             gray_img_new = cv2.cvtColor(origin_img, cv2.COLOR_BGR2GRAY)
             guass_img_new = cv2.GaussianBlur(gray_img_new, (3, 3), 0)
             ## opencv diff API
-            diff_img = cv2.absdiff(guass_img_new, self.guass_img_old)
+            # diff_img = cv2.absdiff(guass_img_new, self.guass_img_old)
+            ## numpy
+            # attention opecv-python img type is uint8,but np.abs need input np.int16+
+            guass_img_new = np.array(guass_img_new, dtype=np.int16)
+            self.guass_img_old = np.array(self.guass_img_old, dtype=np.int16)
+            diff_img = np.abs(guass_img_new, self.guass_img_old)
+            diff_img = np.array(diff_img, dtype=np.uint8)
+
             thresh_img = cv2.threshold(diff_img, self.thresh, 255, cv2.THRESH_BINARY)
             opening_img = cv2.morphologyEx(thresh_img, cv2.MORPH_OPEN, self.open_kernel)
             conturs = cv2.findContours(opening_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[1]
