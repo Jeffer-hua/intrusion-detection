@@ -53,7 +53,7 @@ class DetectionHandler(object):
                     queue=self.queue_name,
                     # 回调函数
                     consumer_callback=self.callback,
-                    no_ack=True
+                    no_ack=False
                 )
                 is_connection = False
                 return channel, connection
@@ -78,6 +78,7 @@ class DetectionHandler(object):
     def callback(self, ch, method, properties, body):
         # body : RabbitMQ消息队列中传递的消息
         # define queue message
+        ch.basic_ack(delivery_tag=method.delivery_tag)
         data = eval(body.decode("utf-8"))
         frame = pickle.loads(data["frame"])
         camera_id = data["camera_id"]
