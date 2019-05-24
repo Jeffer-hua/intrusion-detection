@@ -60,7 +60,10 @@ class ImgHandler(object):
 
     def keep_alive(self):
         # on time seed heartbeat
-        self.connection.process_data_events()
+        try:
+            self.connection.process_data_events()
+        except Exception as e:
+            self.channel, self.connection = self.load_channel()
 
 
 def producer_intrusion(queue, CAMERA_NAME, CAMERA_PWD, camera_ip, camera_id, camera_type):
@@ -134,7 +137,8 @@ def run():  # mutil camera
             camera_info_data = {
                 "server_ip": ICV_IP
             }
-            post_camera_data = requests.post(SERVER_URL_DICT["intrusion_camera_info"], json=json.dumps(camera_info_data))
+            post_camera_data = requests.post(SERVER_URL_DICT["intrusion_camera_info"],
+                                             json=json.dumps(camera_info_data))
             post_camera_data = json.loads(post_camera_data.text)
             camera_id_list = post_camera_data["data"]["camera_id_list"]
             camera_type_list = post_camera_data["data"]["camera_type_list"]
@@ -163,7 +167,7 @@ def run():  # mutil camera
                                args=(queue, CAMERA_NAME, CAMERA_PWD, camera_ip, camera_id, camera_type)))
                 process_intrusion.append(
                     mp.Process(target=customer_intrusion,
-                               args=(queue,ori_data, num_camera)))
+                               args=(queue, ori_data, num_camera)))
 
         [process.start() for process in process_intrusion]
         [process.join() for process in process_intrusion]
