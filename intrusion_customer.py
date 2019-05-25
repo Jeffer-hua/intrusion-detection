@@ -4,7 +4,6 @@ import pika
 import time
 import pickle
 from vision.yolov3 import Detection_YOLOV3
-from util.data_trans import send_data
 import cv2
 import json
 import numpy as np
@@ -96,8 +95,7 @@ class DetectionHandler(object):
                 # folder now day name
                 localtime = time.strftime('%Y-%m-%d', time.localtime(time.time()))
                 intrusion_backup_path = os.path.join(ICV_IMG_PATH, str(camera_id), localtime,
-                                                     IMG_NAME_DICT["intrusion_bp_name"],
-                                                     back_name)
+                                                     IMG_NAME_DICT["intrusion_bp_name"],back_name)
                 # save origin image to train
                 if SAVE_ORI_INTRUSION_IMG:
                     cv2.imwrite(intrusion_backup_path, frame)
@@ -107,36 +105,19 @@ class DetectionHandler(object):
                     if is_box:
                         show_green_box = False
                         status_type = "异常"
-                        message_id = MESSAGE_ID_DICT["intrusion"]["wrong"]
                     else:
                         show_green_box = True
                         status_type = "正常"
-                        message_id = MESSAGE_ID_DICT["intrusion"]["ok"]
                     show_img = object_draw(boxes, frame.copy(), show_green_box)
                     show_img = cv2.drawContours(show_img, [ori_data], -1, (0, 255, 255), 3)
                     img_name = "{}.jpg".format(str(time.time()).replace(".", ""))
 
                     intrusion_result_path = os.path.join(ICV_IMG_PATH, str(camera_id), localtime,
-                                                         IMG_NAME_DICT["intrusion_res_name"],
-                                                         img_name)
+                                                         IMG_NAME_DICT["intrusion_res_name"],img_name)
                     intrusion_save_path = os.path.split(intrusion_result_path)[0]
                     if not os.path.exists(intrusion_save_path):
                         os.makedirs(intrusion_save_path)
-
                     cv2.imwrite(intrusion_result_path, show_img)
-                    # API to send result
-                    try:
-                        data = {"camera_id": camera_id,
-                                "intrusion_result_path": intrusion_result_path,
-                                "detection_time": detection_time,
-                                "message_id": message_id,
-                                "status_type": status_type}
-                        file = {"file": open(intrusion_result_path, "rb").read()}
-                        is_send = send_data(data, file, SERVER_URL_DICT["intrusion_result"])
-                        if not is_send:
-                            logger_handle.info(f'[INFO] {camera_id} {detection_time} intrusion is_send error.')
-                    except Exception as e:
-                        logger_handle.info(f'[INFO] {camera_id} {detection_time} intrusion is_send error.')
 
 
 if __name__ == '__main__':

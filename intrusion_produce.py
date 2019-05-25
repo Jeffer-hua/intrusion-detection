@@ -7,7 +7,7 @@ import time
 import requests
 import json
 import numpy as np
-from script.camera.camera_protocol import *
+from util.camera_protocol import *
 from conf.config_setting import *
 from conf.config_function import detection_timer, logging_handle
 
@@ -127,7 +127,7 @@ def customer_intrusion(queue, ori_data, num_camera):
 
 def run():  # mutil camera
     # A time to wait rabbitmq running
-    time.sleep(60)
+    # time.sleep(60)
     process_intrusion, camera_id_list, camera_ip_list, camera_type_list, ori_data_list = [], [], [], [], []
     # keep connection mysql to get camera info
     is_connection = True
@@ -148,16 +148,10 @@ def run():  # mutil camera
         except Exception as e:
             logger_intrusion.info(f'[INFO] query camera info error')
             time.sleep(120)
-    # print(camera_id_list)
     if camera_id_list:
         # make image dir
         is_dir = manage_dir(camera_id_list, ICV_IMG_PATH, IMG_NAME_DICT)
-
-        # API to make server dir
-        dir_data = {"camera_id_list": camera_id_list}
-        post_dir_data = requests.post(SERVER_URL_DICT["manager_dir"], json=json.dumps(dir_data))
-        post_dir_data = json.loads(post_dir_data.text)
-        if is_dir and post_dir_data["success"]:
+        if is_dir:
             num_camera = len(camera_id_list)
             queue_list = [mp.Queue(maxsize=2) for _ in camera_id_list]
             for queue, camera_ip, camera_id, camera_type, ori_data in zip(queue_list, camera_ip_list, camera_id_list,
