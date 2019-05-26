@@ -11,8 +11,6 @@ from util.camera_protocol import *
 from conf.config_setting import *
 from conf.config_function import detection_timer, logging_handle
 
-logger_intrusion = logging_handle(LOGGING_PATH_DICT["intrusion"])
-
 
 class ImgHandler(object):
     def __init__(self, username, password, host, queue_name):
@@ -106,8 +104,8 @@ def customer_intrusion(queue, ori_data, num_camera):
         :return:
         '''
     # Init RabbitMQ to put image
-    img_mq = ImgHandler(INTRUSIONMQ_PARAMS["username"], INTRUSIONMQ_PARAMS["password"], INTRUSIONMQ_PARAMS["host"],
-                        INTRUSIONMQ_PARAMS["queue_name"])
+    img_mq = ImgHandler(V_INTRUSION_MQ["username"], V_INTRUSION_MQ["password"], V_INTRUSION_MQ["host"],
+                        V_INTRUSION_MQ["queue_name"])
     while True:
         # seed heartbeat to keep communication
         img_mq.keep_alive()
@@ -168,4 +166,5 @@ def run():  # mutil camera
 
 
 if __name__ == '__main__':
+    logger_intrusion = logging_handle(LOGGING_PATH_DICT["intrusion"])
     run()
