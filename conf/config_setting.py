@@ -5,19 +5,12 @@ ICV_INSTALL_PATH = "/opt/icv_client"
 ICV_IP = "192.168.10.246"
 ICV_IMG_PATH = '/home/oem/img'
 
-# RBMQ dress setting
-DRESSMQ_PARAMS = {
-    "host": 'localhost',
-    "username": "rabbitmq",  # mq用户名
-    "password": "rabbitmq",  # mq密码
-    "queue_name": "safety_dress"
-}
 
-INTRUSIONMQ_PARAMS = {
+V_INTRUSION_MQ = {
     "host": 'localhost',
     "username": "rabbitmq",  # mq用户名
     "password": "rabbitmq",  # mq密码
-    "queue_name": "intrusion"
+    "queue_name": "vision_intrusion"
 }
 
 INTRUSION_FPS = 2
