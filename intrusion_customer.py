@@ -80,7 +80,7 @@ class DetectionHandler(object):
         ch.basic_ack(delivery_tag=method.delivery_tag)
         data = eval(body.decode("utf-8"))
         frame = pickle.loads(data["frame"])
-        camera_id = data["camera_id"]
+        camera_ip = data["camera_ip"]
         detection_time = data["detection_time"]
         ori_data = data["ori_data"]
         camera_pts = json.loads(ori_data)
@@ -94,7 +94,7 @@ class DetectionHandler(object):
                 back_name = "{}.jpg".format(str(time.time()).replace(".", ""))
                 # folder now day name
                 localtime = time.strftime('%Y-%m-%d', time.localtime(time.time()))
-                intrusion_backup_path = os.path.join(ICV_IMG_PATH, str(camera_id), localtime,
+                intrusion_backup_path = os.path.join(ICV_IMG_PATH, str(camera_ip), localtime,
                                                      IMG_NAME_DICT["intrusion_bp_name"],back_name)
                 # save origin image to train
                 if SAVE_ORI_INTRUSION_IMG:
@@ -112,7 +112,7 @@ class DetectionHandler(object):
                     show_img = cv2.drawContours(show_img, [ori_data], -1, (0, 255, 255), 3)
                     img_name = "{}.jpg".format(str(time.time()).replace(".", ""))
 
-                    intrusion_result_path = os.path.join(ICV_IMG_PATH, str(camera_id), localtime,
+                    intrusion_result_path = os.path.join(ICV_IMG_PATH, str(camera_ip), localtime,
                                                          IMG_NAME_DICT["intrusion_res_name"],img_name)
                     intrusion_save_path = os.path.split(intrusion_result_path)[0]
                     if not os.path.exists(intrusion_save_path):
@@ -125,7 +125,6 @@ if __name__ == '__main__':
     # time.sleep(60)
     init_image = cv2.imread(os.path.join(ICV_INSTALL_PATH, "model", "intrusion", "test.jpg"))
     logger_handle = logging_handle(LOGGING_PATH_DICT["intrusion"])
-    detection_mq = DetectionHandler(INTRUSIONMQ_PARAMS["username"], INTRUSIONMQ_PARAMS["password"],
-                                    INTRUSIONMQ_PARAMS["host"],
-                                    INTRUSIONMQ_PARAMS["queue_name"], logger_handle, init_image)
+    detection_mq = DetectionHandler(V_INTRUSION_MQ["username"], V_INTRUSION_MQ["password"],
+                                    V_INTRUSION_MQ["host"],V_INTRUSION_MQ["queue_name"], logger_handle, init_image)
     detection_mq.detection()
