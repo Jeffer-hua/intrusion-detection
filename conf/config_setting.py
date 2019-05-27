@@ -5,6 +5,7 @@ ICV_IMG_PATH = '/home/oem/img'
 
 CAMERA_IP_LIST = ["192.168.1.100"]
 CAMERA_TYPE_LIST = ["rtsp"]
+CAMERA_POINT_LIST = [[[51, 439], [859, 538], [1077, 544], [1070, 627], [70, 483]]]
 
 V_INTRUSION_MQ = {
     "host": 'localhost',
