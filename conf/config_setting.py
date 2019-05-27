@@ -1,10 +1,10 @@
 import os
 
-# ICV系统基本配置
 ICV_INSTALL_PATH = "/opt/icv_client"
-ICV_IP = "192.168.10.246"
 ICV_IMG_PATH = '/home/oem/img'
 
+CAMERA_IP_LIST = ["192.168.1.100"]
+CAMERA_TYPE_LIST = ["rtsp"]
 
 V_INTRUSION_MQ = {
     "host": 'localhost',
