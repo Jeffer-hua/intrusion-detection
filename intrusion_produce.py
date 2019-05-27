@@ -125,9 +125,9 @@ def customer_intrusion(queue, ori_data, num_camera):
 def run():  # mutil camera
     # A time to wait rabbitmq running
     # time.sleep(60)
-    process_intrusion, ori_data_list = [], []
+    process_intrusion = []
 
-    if ori_data_list:
+    if CAMERA_POINT_LIST:
         # make image dir
         is_dir = manage_dir(CAMERA_IP_LIST, ICV_IMG_PATH, IMG_NAME_DICT)
         if is_dir:
