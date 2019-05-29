@@ -37,7 +37,7 @@ class ImgHandler(object):
             channel.queue_declare(queue=self.queue_name, durable=True)
             return channel, connection
         except Exception as e:
-            logger_intrusion.info(f'[INFO] produce load_channel error.')
+            logger_handle.info(f'[INFO] produce load_channel error.')
             return False
 
     def upload_img(self, data):
@@ -53,7 +53,7 @@ class ImgHandler(object):
                                        properties=pika.BasicProperties(delivery_mode=2,  # make message persistent
                                                                        ))
         except Exception as e:
-            logger_intrusion.info(f'[INFO] upload_img error.')
+            logger_handle.info(f'[INFO] upload_img error.')
 
     def keep_alive(self):
         # on time seed heartbeat
@@ -90,7 +90,7 @@ def producer_intrusion(queue, CAMERA_NAME, CAMERA_PWD, camera_ip, camera_type):
             # if get frame failed,put None
             queue.put((None, None, None))
             cap = rtsp_camera(CAMERA_NAME, CAMERA_PWD, camera_ip)
-            logger_intrusion.info(f'[INFO] {camera_ip} customer_intrusion put queue error.')
+            logger_handle.info(f'[INFO] {camera_ip} customer_intrusion put queue error.')
         # keep 1 frame in queue,queue.qsize=2
         queue.get() if queue.qsize() > 1 else None
 
@@ -134,7 +134,7 @@ def run():  # mutil camera
             num_camera = len(CAMERA_IP_LIST)
             queue_list = [mp.Queue(maxsize=2) for _ in CAMERA_IP_LIST]
             for queue, camera_ip, camera_type, ori_data in zip(queue_list, CAMERA_IP_LIST, CAMERA_TYPE_LIST,
-                                                               ori_data_list):
+                                                               CAMERA_POINT_LIST):
                 process_intrusion.append(
                     mp.Process(target=producer_intrusion,
                                args=(queue, CAMERA_NAME, CAMERA_PWD, camera_ip, camera_type)))
@@ -147,5 +147,5 @@ def run():  # mutil camera
 
 
 if __name__ == '__main__':
-    logger_intrusion = logging_handle(LOGGING_PATH_DICT["intrusion"])
+    logger_handle = logging_handle(LOGGING_PATH_DICT["intrusion"])
     run()
