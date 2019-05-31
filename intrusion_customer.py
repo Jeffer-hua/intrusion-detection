@@ -7,7 +7,7 @@ from vision.yolov3 import Detection_YOLOV3
 import cv2
 import json
 import numpy as np
-from util.pts_in_box import isin_multipolygon
+from util.pts_in_box import isin_multipolygon, is_in_regions
 from util.label_image import object_draw
 from conf.config_setting import *
 from conf.config_function import detection_timer, logging_handle
@@ -95,13 +95,14 @@ class DetectionHandler(object):
                 # folder now day name
                 localtime = time.strftime('%Y-%m-%d', time.localtime(time.time()))
                 intrusion_backup_path = os.path.join(ICV_IMG_PATH, str(camera_ip), localtime,
-                                                     IMG_NAME_DICT["intrusion_bp_name"],back_name)
+                                                     IMG_NAME_DICT["intrusion_bp_name"], back_name)
                 # save origin image to train
                 if SAVE_ORI_INTRUSION_IMG:
                     cv2.imwrite(intrusion_backup_path, frame)
                 for boxes in boxes_list:
-                    is_box = isin_multipolygon([int(boxes[0] + boxes[2]), int(boxes[1] + boxes[3])], ori_data.tolist(),
-                                               contain_boundary=True)
+                    # is_box = isin_multipolygon([int(boxes[0] + boxes[2]), int(boxes[1] + boxes[3])], ori_data.tolist(),
+                    # contain_boundary=True)
+                    is_box = is_in_regions(ori_data, (int(boxes[0] + boxes[2]), int(boxes[1] + boxes[3])))
                     if is_box:
                         show_green_box = False
                         status_type = "异常"
@@ -113,7 +114,7 @@ class DetectionHandler(object):
                     img_name = "{}.jpg".format(str(time.time()).replace(".", ""))
 
                     intrusion_result_path = os.path.join(ICV_IMG_PATH, str(camera_ip), localtime,
-                                                         IMG_NAME_DICT["intrusion_res_name"],img_name)
+                                                         IMG_NAME_DICT["intrusion_res_name"], img_name)
                     intrusion_save_path = os.path.split(intrusion_result_path)[0]
                     if not os.path.exists(intrusion_save_path):
                         os.makedirs(intrusion_save_path)
@@ -126,5 +127,5 @@ if __name__ == '__main__':
     init_image = cv2.imread(os.path.join(ICV_INSTALL_PATH, "model", "intrusion", "test.jpg"))
     logger_handle = logging_handle(LOGGING_PATH_DICT["intrusion"])
     detection_mq = DetectionHandler(V_INTRUSION_MQ["username"], V_INTRUSION_MQ["password"],
-                                    V_INTRUSION_MQ["host"],V_INTRUSION_MQ["queue_name"], logger_handle, init_image)
+                                    V_INTRUSION_MQ["host"], V_INTRUSION_MQ["queue_name"], logger_handle, init_image)
     detection_mq.detection()
