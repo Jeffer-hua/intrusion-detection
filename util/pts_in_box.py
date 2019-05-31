@@ -1,4 +1,6 @@
 import time
+import cv2
+import numpy as np
 
 
 def isinpolygon(point, vertex_lst: list, contain_boundary=True):
@@ -67,15 +69,32 @@ def isin_multipolygon(poi, vertex_lst, contain_boundary=True):
         return (False, True)[contain_boundary]
     elif intersect:
         sinsc += 1
-   
+
     return sinsc % 2 == 1
+
+
+def is_in_regions(roi, point):
+    '''
+    判断点是否在区域内
+    :param roi: [[] []],np.array
+    :param point: (x,y)
+    :return: True or False
+    '''
+    #pointPolygonTest
+    # 查找图像中的点与轮廓之间的最短距离，第三个参数为TRUE，则返回距离，第三个参数为FALSE,则返回对应关系。
+    # if point in roi,return 1,if point out roi,return -1,if point at roi,return 0.
+    dist = cv2.pointPolygonTest(roi, point, False)
+    if dist == 0 or dist == 1:
+        return True
+    else:
+        return False
 
 
 if __name__ == '__main__':
     time1 = time.time()
     vertex_lst = [[300, 300], [1800, 300], [300, 1000], [1900, 1000]]
-    poi = [300, 500]
-    print(isin_multipolygon(poi, vertex_lst, contain_boundary=True))
-    time.sleep(5)
+    cnt = np.array(vertex_lst)
+    poi = (300, 500)
+    dist = cv2.pointPolygonTest(cnt, (50, 50), False)
     time2 = time.time()
     print(time2 - time1)
