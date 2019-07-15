@@ -8,7 +8,6 @@ import numpy as np
 from util.camera_protocol import *
 from conf.config_setting import *
 from conf.config_function import detection_timer, logging_handle
-from util.manage_floder import manage_dir
 
 
 class ImgHandler(object):
@@ -37,7 +36,7 @@ class ImgHandler(object):
             channel.queue_declare(queue=self.queue_name, durable=True)
             return channel, connection
         except Exception as e:
-            logger_handle.info(f'[INFO] produce load_channel error.')
+            logger_handle.error('produce load_channel error {}'.format(e))
             return False
 
     def upload_img(self, data):
@@ -53,7 +52,7 @@ class ImgHandler(object):
                                        properties=pika.BasicProperties(delivery_mode=2,  # make message persistent
                                                                        ))
         except Exception as e:
-            logger_handle.info(f'[INFO] upload_img error.')
+            logger_handle.error('[INFO] upload_img error {}'.format(e))
 
     def keep_alive(self):
         # on time seed heartbeat
@@ -74,12 +73,11 @@ def producer_intrusion(queue, CAMERA_NAME, CAMERA_PWD, camera_ip, camera_type):
     :return:
     '''
     # Init camera cap
+    # Can append other camera protocol
     if camera_type == "rtsp":
         cap = rtsp_camera(CAMERA_NAME, CAMERA_PWD, camera_ip)
-    elif camera_type == "nvr":
-        cap = nvr_camera(CAMERA_NAME, CAMERA_PWD, camera_ip)
     else:
-        cap = rtmp_camera(camera_ip)
+        cap = None
     while True:
         is_opened, frame = cap.read()
         detection_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
@@ -129,18 +127,16 @@ def run():  # mutil camera
 
     if CAMERA_POINT_LIST:
         # make image dir
-        is_dir = manage_dir(CAMERA_IP_LIST, ICV_IMG_PATH, IMG_NAME_DICT)
-        if is_dir:
-            num_camera = len(CAMERA_IP_LIST)
-            queue_list = [mp.Queue(maxsize=2) for _ in CAMERA_IP_LIST]
-            for queue, camera_ip, camera_type, ori_data in zip(queue_list, CAMERA_IP_LIST, CAMERA_TYPE_LIST,
-                                                               CAMERA_POINT_LIST):
-                process_intrusion.append(
-                    mp.Process(target=producer_intrusion,
-                               args=(queue, CAMERA_NAME, CAMERA_PWD, camera_ip, camera_type)))
-                process_intrusion.append(
-                    mp.Process(target=customer_intrusion,
-                               args=(queue, ori_data, num_camera)))
+        num_camera = len(CAMERA_IP_LIST)
+        queue_list = [mp.Queue(maxsize=2) for _ in CAMERA_IP_LIST]
+        for queue, camera_ip, camera_type, ori_data in zip(queue_list, CAMERA_IP_LIST, CAMERA_TYPE_LIST,
+                                                           CAMERA_POINT_LIST):
+            process_intrusion.append(
+                mp.Process(target=producer_intrusion,
+                           args=(queue, CAMERA_NAME, CAMERA_PWD, camera_ip, camera_type)))
+            process_intrusion.append(
+                mp.Process(target=customer_intrusion,
+                           args=(queue, ori_data, num_camera)))
 
         [process.start() for process in process_intrusion]
         [process.join() for process in process_intrusion]
