@@ -80,7 +80,7 @@ def is_in_regions(roi, point):
     :param point: (x,y)
     :return: True or False
     '''
-    #pointPolygonTest
+    # pointPolygonTest
     # 查找图像中的点与轮廓之间的最短距离，第三个参数为TRUE，则返回距离，第三个参数为FALSE,则返回对应关系。
     # if point in roi,return 1,if point out roi,return -1,if point at roi,return 0.
     dist = cv2.pointPolygonTest(roi, point, False)
@@ -89,12 +89,12 @@ def is_in_regions(roi, point):
     else:
         return False
 
-
-if __name__ == '__main__':
-    time1 = time.time()
-    vertex_lst = [[300, 300], [1800, 300], [300, 1000], [1900, 1000]]
-    cnt = np.array(vertex_lst)
-    poi = (300, 500)
-    dist = cv2.pointPolygonTest(cnt, (50, 50), False)
-    time2 = time.time()
-    print(time2 - time1)
+#
+# if __name__ == '__main__':
+#     time1 = time.time()
+#     vertex_lst = [[300, 300], [1800, 300], [300, 1000], [1900, 1000]]
+#     cnt = np.array(vertex_lst)
+#     poi = (300, 500)
+#     dist = cv2.pointPolygonTest(cnt, (50, 50), False)
+#     time2 = time.time()
+#     print(time2 - time1)
