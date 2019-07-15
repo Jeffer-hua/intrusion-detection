@@ -7,7 +7,7 @@ from vision.yolov3 import Detection_YOLOV3
 import cv2
 import json
 import numpy as np
-from util.pts_in_box import isin_multipolygon, is_in_regions
+from util.pts_in_box import is_in_regions
 from util.label_image import object_draw
 from conf.config_setting import *
 from conf.config_function import detection_timer, logging_handle
@@ -73,7 +73,7 @@ class DetectionHandler(object):
                 self.logger_handle.info("Trying to reconnect...")
                 self.channel, self.connection = self.load_channel()
 
-    # @detection_timer
+    @detection_timer
     def callback(self, ch, method, properties, body):
         # body : RabbitMQ消息队列中传递的消息
         # define queue message
@@ -82,8 +82,7 @@ class DetectionHandler(object):
         frame = pickle.loads(data["frame"])
         camera_ip = data["camera_ip"]
         detection_time = data["detection_time"]
-        ori_data = data["ori_data"]
-        camera_pts = json.loads(ori_data)
+        camera_pts = data["ori_data"]
         ori_data = np.array(camera_pts)
         # 保证图片完整性,cv2中image格式为np
         if isinstance(frame, np.ndarray):
@@ -94,21 +93,13 @@ class DetectionHandler(object):
                 back_name = "{}.jpg".format(str(time.time()).replace(".", ""))
                 # folder now day name
                 localtime = time.strftime('%Y-%m-%d', time.localtime(time.time()))
-                intrusion_backup_path = os.path.join(ICV_IMG_PATH, str(camera_ip), localtime,
-                                                     IMG_NAME_DICT["intrusion_bp_name"], back_name)
-                # save origin image to train
-                if SAVE_ORI_INTRUSION_IMG:
-                    cv2.imwrite(intrusion_backup_path, frame)
                 for boxes in boxes_list:
-                    # is_box = isin_multipolygon([int(boxes[0] + boxes[2]), int(boxes[1] + boxes[3])], ori_data.tolist(),
-                    # contain_boundary=True)
+                    # judge objection is in region
                     is_box = is_in_regions(ori_data, (int(boxes[0] + boxes[2]), int(boxes[1] + boxes[3])))
                     if is_box:
                         show_green_box = False
-                        status_type = "异常"
                     else:
                         show_green_box = True
-                        status_type = "正常"
                     show_img = object_draw(boxes, frame.copy(), show_green_box)
                     show_img = cv2.drawContours(show_img, [ori_data], -1, (0, 255, 255), 3)
                     img_name = "{}.jpg".format(str(time.time()).replace(".", ""))
@@ -122,9 +113,8 @@ class DetectionHandler(object):
 
 
 if __name__ == '__main__':
-    # A time to wait rabbitmq running
-    # time.sleep(60)
-    init_image = cv2.imread(os.path.join(ICV_INSTALL_PATH, "model", "intrusion", "test.jpg"))
+    # Load model
+    init_image = cv2.imread(os.path.join(ICV_INSTALL_PATH, "model", "test.jpg"))
     logger_handle = logging_handle(LOGGING_PATH_DICT["intrusion"])
     detection_mq = DetectionHandler(V_INTRUSION_MQ["username"], V_INTRUSION_MQ["password"],
                                     V_INTRUSION_MQ["host"], V_INTRUSION_MQ["queue_name"], logger_handle, init_image)
