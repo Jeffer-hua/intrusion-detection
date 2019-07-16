@@ -3,7 +3,7 @@
 - environment : ubuntu18.04+Rabbitmq
 - 支持rtsp协议的网络相机
 
-1.pip3 install -i requirements.txt
+1.pip3 install -r requirements.txt
 
 2.Downloads yolov3.weights
 
