@@ -2,6 +2,6 @@ Flask==1.0.2
 numpy==1.16.4
 opencv-python==3.4.4.19
 pika==0.13.0
-Pillow==5.1.0
+Pillow==6.2.0
 
 
